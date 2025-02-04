@@ -175,24 +175,7 @@
         <input type="tel" id="phone" placeholder="Ваш телефон" class="desc-inp">
         <input type="text" id="date-picker" placeholder="Выберите дату">
         <input type="text" id="time-picker" placeholder="Выберите время">
-        
-        <!-- Контейнер с плейсхолдером для выпадающего списка -->
-        <div class="input-with-placeholder">
-            <select id="people-count">
-                <option value="" disabled selected>Количество человек</option>
-                <option value="1">1 человек</option>
-                <option value="2">2 человека</option>
-                <option value="3">3 человека</option>
-                <option value="4">4 человека</option>
-                <option value="5">5 человек</option>
-                <option value="6">6 человек</option>
-                <option value="7">7 человек</option>
-                <option value="8">8 человек</option>
-                <option value="9">9 человек</option>
-                <option value="10">10 человек</option>
-            </select>
-            <span class="placeholder">Количество человек</span>
-        </div>
+        <input type="number" placeholder="Количество человек" class="countPeople">
 
         <button class="btn s-btn">Отправить</button>
     </form>
@@ -205,93 +188,109 @@
             const loader = document.querySelector(".loader");
             const main = document.querySelector(".Main");
             const form = document.querySelector(".test-form");
-
+            const submitButton = document.querySelector(".s-btn");
+            const phoneInput = document.getElementById("phone");
+            const token = '7571474973:AAF3bwSdOwf7MyZ6GM7-osHdYaJIGTZxzQg'; // Токен вашего бота
+            const chat_id = '-1002277561873'; // ID вашего чата
+    
             // Обработчик для кнопки "Я хочу забронировать столик"
             document.getElementById("book-table-btn").addEventListener("click", function () {
                 loader.style.display = "flex";
                 main.style.display = "none";
                 form.style.display = "none";
-
+    
                 setTimeout(() => {
                     loader.style.display = "none";
-                    main.style.display = "none";
                     form.style.display = "flex";
                 }, 5000);
             });
-
             // Обработчик для кнопки "Меню"
             document.getElementById("menu-btn").addEventListener("click", function () {
                 loader.style.display = "flex";
-                main.style.display = "none";
-                form.style.display = "none";
 
                 setTimeout(() => {
-                    window.location.href = "https://chori-vrn.ru/";
-                }, 5000);
+                window.location.href = "https://chori-vrn.ru/";
+            }, 5000);
             });
 
-            // Обработчик для выпадающего списка
-            const select = document.getElementById('people-count');
-            const placeholder = document.querySelector('.input-with-placeholder .placeholder');
-
-            select.addEventListener('change', function () {
-                if (this.value !== "") {
-                    placeholder.style.opacity = '0';
-                    placeholder.style.visibility = 'hidden';
-                } else {
-                    placeholder.style.opacity = '1';
-                    placeholder.style.visibility = 'visible';
-                }
+            // Обработчик отправки формы
+            submitButton.addEventListener("click", function (e) {
+                e.preventDefault(); // Останавливаем стандартное поведение формы
+    
+                // Считываем данные из формы
+                const name = document.querySelector(".title-inp").value.trim();
+                const phone = document.getElementById("phone").value.trim();
+                const date = document.getElementById("date-picker").value.trim();
+                const time = document.getElementById("time-picker").value.trim();
+                const peopleCount = document.querySelector(".countPeople").value;
+                
+                // Формируем сообщение для Telegram
+                const message = `
+    <b>Новая заявка на бронирование столика:</b>
+    Имя: ${name}
+    Телефон: ${phone}
+    Дата: ${date}
+    Время: ${time}
+    Количество человек: ${peopleCount}
+                `.trim();
+                // Отправляем данные в Telegram
+                loader.style.display = "flex"; // Показываем "загрузчик"
+                form.style.display = "none"; // Скрываем форму
+    
+                fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        chat_id: chat_id,
+                        text: message,
+                        parse_mode: "HTML", // Чтобы текст сообщения поддерживал HTML
+                    }),
+                })
+                    .then((response) => response.json())
+                    .then((data) => {
+                        loader.style.display = "none"; // Скрываем "загрузчик"
+                        if (data.ok) {
+                            alert("Ваше сообщение успешно отправлено!");
+    
+                            // Сбрасываем форму
+                            document.querySelector(".test-form").reset();
+                            main.style.display = "flex"; // Возвращаемся к главному экрану
+                        } else {
+                            alert("Произошла ошибка при отправке сообщения. Попробуйте снова.");
+                            form.style.display = "flex"; // Показываем форму снова
+                        }
+                    })
+                    .catch((error) => {
+                        loader.style.display = "none"; // Скрываем "загрузчик"
+                        console.error("Ошибка:", error);
+                        alert("Произошла ошибка соединения. Попробуйте снова.");
+                        form.style.display = "flex"; // Показываем форму снова
+                    });
             });
-            document.querySelector('.s-btn').addEventListener('click', function () {
-            const name = document.querySelector('.title-inp').value;
-            const phone = document.getElementById('phone').value;
-            const date = document.getElementById('date-picker').value;
-            const time = document.getElementById('time-picker').value;
-            const peopleCount = document.getElementById('people-count').value;
-
-            const data = {
-                name: name,
-                phone: phone,
-                date: date,
-                time: time,
-                peopleCount: peopleCount
-            };
-                Telegram.WebApp.ready();
-                Telegram.WebApp.sendData(JSON.stringify(data));
-            
-            
+    
+            // Автоматическое форматирование телефона
+            phoneInput.addEventListener("input", function (e) {
+                let x = e.target.value.replace(/\D/g, "").match(/(\d{0,1})(\d{0,3})(\d{0,3})(\d{0,2})(\d{0,2})/);
+                e.target.value = "+7" + (x[2] ? " (" + x[2] : "") + (x[3] ? ") " + x[3] : "") + (x[4] ? "-" + x[4] : "") + (x[5] ? "-" + x[5] : "");
+            });
+    
+            // Flatpickr настройки для выбора даты и времени
+            flatpickr("#date-picker", {
+                animate: true,
+                dateFormat: "Y-m-d",
+                minDate: "today",
+                locale: "ru",
+            });
+    
+            flatpickr("#time-picker", {
+                enableTime: true,
+                noCalendar: true,
+                dateFormat: "H:i",
+                time_24hr: true,
+                minuteIncrement: 15,
+                locale: "ru",
+            });
         });
-        });
-
-        flatpickr("#date-picker", {
-            animate: true, 
-            dateFormat: "Y-m-d", 
-            minDate: "today", 
-            locale: "ru"
-        });
-
-        flatpickr("#time-picker", {
-            enableTime: true, 
-            noCalendar: true, 
-            dateFormat: "H:i", 
-            time_24hr: true, 
-            minuteIncrement: 15, 
-            locale: "ru"
-        });
-
-        document.getElementById('phone').addEventListener('input', function (e) {
-            let x = e.target.value.replace(/\D/g, '').match(/(\d{0,1})(\d{0,3})(\d{0,3})(\d{0,2})(\d{0,2})/);
-            e.target.value = '+7' + (x[2] ? ' (' + x[2] : '') + (x[3] ? ') ' + x[3] : '') + (x[4] ? '-' + x[4] : '') + (x[5] ? '-' + x[5] : '');
-        });
-
-        // let tg = window.Telegram.WebApp;
-        // let sBtn = document.getElementsByClassName("s-btn")[0];
-
-        // sBtn.addEventListener("click", () => {
-        //     tg.close();
-        // });
-        
     </script>
 </body>
 </html>

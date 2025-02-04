@@ -11,7 +11,7 @@ forwarded_messages = {}
 GROUP_CHAT_ID = -1002277561873
 
 # URL для WebApp
-web_app = WebAppInfo(url="https://translate.yandex.ru/?from=tableau_yabro")
+web_app = WebAppInfo(url="https://choribot.ru/")
 
 # Токен вашего бота
 TOKEN = "7571474973:AAF3bwSdOwf7MyZ6GM7-osHdYaJIGTZxzQg"
@@ -21,55 +21,48 @@ application = Application.builder().token(TOKEN).build()
 
 # Функция, вызываемая при нажатии на команду /start
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    keyboard = [
-        [KeyboardButton("Отзыв")],
-        [KeyboardButton("Вопрос по доставке")],
-        [KeyboardButton("Связаться с менеджером")],
-        [KeyboardButton("Бронь стола", web_app=web_app)]
-    ]
-    reply_markup = ReplyKeyboardMarkup(
-        keyboard=keyboard, resize_keyboard=True, one_time_keyboard=False
-    )
-    await update.message.reply_text(
-        text="Намасте, друзья☀️\n\nРады приветствовать вас в нашем чат-боте! Здесь вы сможете получить ответы на ваши вопросы, оставить отзыв на удобной площадке, а также забронировать столик в один клик. \n\nВыберите, пожалуйста, нужную вам опцию🧘🏼‍♀️",
-        reply_markup=reply_markup
-    )
-
-# Обработчик нажатий на кнопку Отзыв
-async def review_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     inline_keyboard = InlineKeyboardMarkup([
-        [InlineKeyboardButton("Яндекс Карты", url="https://yandex.ru/maps/org/chori/98310370984/reviews")],
-        [InlineKeyboardButton("2ГИС", url="https://2gis.ru/voronezh/firm/70000001062575386/tab/reviews")]
+        [InlineKeyboardButton("Бронь стола", web_app=web_app)],  # Inline кнопка с WebApp
+        [InlineKeyboardButton("Отзыв", callback_data="review")],  # Кнопка с callback_data
+        [InlineKeyboardButton("Вопрос по доставке", callback_data="delivery_question")],  # Кнопка с callback_data
+        [InlineKeyboardButton("Связаться с менеджером", callback_data="contact_manager")]  # Ещё одна Inline кнопка
     ])
     await update.message.reply_text(
-        "Нам безумно приятно, когда вы оставляете свое мнение о нашей работе! ☀️\n\nПожалуйста, поделись своим отзывом о заведении. Вы можете указать, что больше всего понравилось, а также, что можно улучшить. Это поможет нам стать лучше!",
+        text="Намасте, друзья☀️\n\nРады приветствовать вас в нашем чат-боте! Здесь вы сможете получить ответы на ваши вопросы, оставить отзыв на удобной площадке, а также забронировать столик в один клик. \n\nВыберите, пожалуйста, нужную вам опцию🧘🏼‍♀️",
         reply_markup=inline_keyboard
-    )
-
-# Обработчик нажатий на кнопку Вопрос по доставке        
-async def handle_delivery_question(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    inline_keyboard = [
-        [InlineKeyboardButton("Промокод за отзыв", callback_data="promo_code")],
-        [InlineKeyboardButton("Оставить обращение", callback_data="leave_request")]
-    ]
-    reply_markup = InlineKeyboardMarkup(inline_keyboard)
-    await update.message.reply_text(
-        "Если у вас возникли вопросы по доставке, выберите одну из предложенных опций⬇️",
-        reply_markup=reply_markup
-    )
-
-# Обработка сообщений пользователей в режиме ожидания
-async def handle_contact_manager(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    user_id = update.message.from_user.id
-    user_states[user_id] = "awaiting_request"
-    await update.message.reply_text(
-        "Если у вас возникли какие-либо вопросы или проблемы, пожалуйста, оставьте ваше обращение для нашего менеджера. В ближайшее время мы с удовольствием поможем вам!☀️"
     )
 
 # Обработчик callback-запросов
 async def handle_callback_query(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
+
+    if query.data == "review":
+        inline_keyboard = InlineKeyboardMarkup([
+            [InlineKeyboardButton("Яндекс Карты", url="https://yandex.ru/maps/org/chori/98310370984/reviews")],
+            [InlineKeyboardButton("2ГИС", url="https://2gis.ru/voronezh/firm/70000001062575386/tab/reviews")]
+        ])
+        await query.message.reply_text(
+            "Нам безумно приятно, когда вы оставляете свое мнение о нашей работе!"
+            " Пожалуйста, поделитесь отзывом о нашем заведении, используя платформу ниже ⬇️",
+            reply_markup=inline_keyboard
+        )
+
+    elif query.data == "delivery_question":
+        inline_keyboard = InlineKeyboardMarkup([
+            [InlineKeyboardButton("Промокод за отзыв", callback_data="promo_code")],
+            [InlineKeyboardButton("Оставить обращение", callback_data="leave_request")]
+        ])
+        await query.message.reply_text(
+            "Если у вас возникли вопросы по доставке, выберите одну из предложенных опций ⬇️",
+            reply_markup=inline_keyboard
+        )
+    elif query.data == "contact_manager":
+        await query.message.reply_text(
+            text="Пожалуйста, напишите ваш вопрос, и наш менеджер свяжется с вами в ближайшее время!"
+        )
+        user_id = query.from_user.id
+        user_states[user_id] = "awaiting_request"  
 
     user_id = query.from_user.id
     if query.data == "promo_code":
@@ -143,15 +136,12 @@ async def group_reply_handler(update: Update, context: ContextTypes.DEFAULT_TYPE
 def main():
     # Регистрация обработчиков
     application.add_handler(CommandHandler("start", start))
-    application.add_handler(MessageHandler(filters.TEXT & filters.Regex("Отзыв"), review_handler))
-    application.add_handler(MessageHandler(filters.TEXT & filters.Regex("Вопрос по доставке"), handle_delivery_question))
-    application.add_handler(MessageHandler(filters.TEXT & filters.Regex("Связаться с менеджером"), handle_contact_manager))
     application.add_handler(CallbackQueryHandler(handle_callback_query))
     application.add_handler(MessageHandler(filters.ChatType.PRIVATE & ~filters.COMMAND, user_message_handler))
     application.add_handler(MessageHandler(filters.Chat(GROUP_CHAT_ID) & ~filters.COMMAND, group_reply_handler))
     application.run_polling()
 
-# Запуск Flask приложения
+# Запуск приложения
 if __name__ == "__main__":
     main()
     
