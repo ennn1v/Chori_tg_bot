@@ -173,8 +173,8 @@
     <form class="test-form">    
         <input type="text" placeholder="Ваше имя" class="title-inp">
         <input type="tel" id="phone" placeholder="Ваш телефон" class="desc-inp">
-        <input type="text" id="date-picker" placeholder="Выберите дату">
-        <input type="text" id="time-picker" placeholder="Выберите время">
+        <input type="date" id="date-picker" placeholder="Выберите дату">
+        <input type="time" id="time-picker" placeholder="Выберите время">
         <input type="number" placeholder="Количество человек" class="countPeople">
 
         <button class="btn s-btn">Отправить</button>
@@ -274,22 +274,22 @@
                 e.target.value = "+7" + (x[2] ? " (" + x[2] : "") + (x[3] ? ") " + x[3] : "") + (x[4] ? "-" + x[4] : "") + (x[5] ? "-" + x[5] : "");
             });
     
-            // Flatpickr настройки для выбора даты и времени
-            flatpickr("#date-picker", {
-                animate: true,
-                dateFormat: "Y-m-d",
-                minDate: "today",
-                locale: "ru",
-            });
+            // // Flatpickr настройки для выбора даты и времени
+            // flatpickr("#date-picker", {
+            //     animate: true,
+            //     dateFormat: "Y-m-d",
+            //     minDate: "today",
+            //     locale: "ru",
+            // });
     
-            flatpickr("#time-picker", {
-                enableTime: true,
-                noCalendar: true,
-                dateFormat: "H:i",
-                time_24hr: true,
-                minuteIncrement: 15,
-                locale: "ru",
-            });
+            // flatpickr("#time-picker", {
+            //     enableTime: true,
+            //     noCalendar: true,
+            //     dateFormat: "H:i",
+            //     time_24hr: true,
+            //     minuteIncrement: 15,
+            //     locale: "ru",
+            // });
         });
     </script>
 </body>
