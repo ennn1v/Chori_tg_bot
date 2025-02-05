@@ -173,8 +173,8 @@
     <form class="test-form">    
         <input type="text" placeholder="Ваше имя" class="title-inp">
         <input type="tel" id="phone" placeholder="Ваш телефон" class="desc-inp">
-        <input type="date" id="date-picker" placeholder="Выберите дату">
-        <input type="time" id="time-picker" placeholder="Выберите время">
+        <input type="date" id="date" placeholder="Выберите дату" class="date-inp">
+        <input type="time" id="time" placeholder="Выберите время" class="time-inp">
         <input type="number" placeholder="Количество человек" class="countPeople">
 
         <button class="btn s-btn">Отправить</button>
@@ -220,8 +220,8 @@
                 // Считываем данные из формы
                 const name = document.querySelector(".title-inp").value.trim();
                 const phone = document.getElementById("phone").value.trim();
-                const date = document.getElementById("date-picker").value.trim();
-                const time = document.getElementById("time-picker").value.trim();
+                const date = document.getElementById("date").value.trim();
+                const time = document.getElementById("time").value.trim();
                 const peopleCount = document.querySelector(".countPeople").value;
                 
                 // Формируем сообщение для Telegram
