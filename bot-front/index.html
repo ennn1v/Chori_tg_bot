@@ -128,18 +128,6 @@
             align-items: center;
         }
 
-        .success-icon {
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
-            background: green;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            position: relative;
-            margin-bottom: 20px;
-        }
-
         .beer-container {
             display: flex;
             gap: 10px;
@@ -165,15 +153,15 @@
             50% { transform: translateX(10px); }
         }
 
-        .success-icon.checked .beer-left,
-        .success-icon.checked .beer-right {
-            display: none;
+        .checkmark {
+            font-size: 40px;
+            color: green;
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
         }
 
-        .success-icon.checked::before {
-            content: "✔";
-            font-size: 40px;
-            color: white;
+        .checkmark.visible {
+            opacity: 1;
         }
 
         .success-text {
@@ -227,12 +215,11 @@
     </form>
 
     <div class="success-message">
-        <div class="success-icon">
-            <div class="beer-container">
-                <div class="beer-left">🍺</div>
-                <div class="beer-right">🍺</div>
-            </div>
+        <div class="beer-container">
+            <div class="beer-left">🍺</div>
+            <div class="beer-right">🍺</div>
         </div>
+        <div class="checkmark">✔</div>
         <div class="success-text">Заявка на бронирование успешно отправлена</div>
     </div>
 
@@ -245,7 +232,8 @@
             const main = document.querySelector(".Main");
             const form = document.querySelector(".test-form");
             const successMessage = document.querySelector(".success-message");
-            const successIcon = document.querySelector(".success-icon");
+            const beerContainer = document.querySelector(".beer-container");
+            const checkmark = document.querySelector(".checkmark");
             const submitButton = document.querySelector(".s-btn");
             const token = '7571474973:AAF3bwSdOwf7MyZ6GM7-osHdYaJIGTZxzQg'; // Токен вашего бота
             const chat_id = '-1002277561873'; // ID вашего чата
@@ -259,7 +247,7 @@
                 setTimeout(() => {
                     loader.style.display = "none";
                     form.style.display = "flex";
-                }, 2000);
+                }, 5000);
             });
 
             // Обработчик для кнопки "Меню"
@@ -268,7 +256,7 @@
 
                 setTimeout(() => {
                     window.location.href = "https://chori-vrn.ru/";
-                }, 2000);
+                }, 5000);
             });
 
             // Валидация имени (только текст)
@@ -490,15 +478,17 @@
                                 // Показываем анимацию успешной отправки
                                 successMessage.style.display = "flex";
 
-                                // Через 2 секунды меняем бокалы на галочку
+                                // Через 2 секунды скрываем бокалы и показываем галочку
                                 setTimeout(() => {
-                                    successIcon.classList.add("checked");
+                                    beerContainer.style.display = "none"; // Скрываем бокалы
+                                    checkmark.classList.add("visible"); // Показываем галочку
                                 }, 2000);
 
                                 // Через 3 секунды возвращаемся на главный экран
                                 setTimeout(() => {
                                     successMessage.style.display = "none";
-                                    successIcon.classList.remove("checked");
+                                    beerContainer.style.display = "flex"; // Восстанавливаем бокалы
+                                    checkmark.classList.remove("visible"); // Скрываем галочку
                                     document.querySelector(".test-form").reset();
                                     main.style.display = "flex";
                                 }, 3000);
