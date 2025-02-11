@@ -262,6 +262,13 @@
             // Валидация имени (только текст)
             const nameInput = document.getElementById("name");
             const nameError = document.getElementById("name-error");
+            
+            document.addEventListener("touchstart", function (e) {
+                if (!e.target.matches("input, textarea, select")) {
+                    // Скрываем клавиатуру
+                    document.activeElement.blur();
+                }
+            });
 
             nameInput.addEventListener("input", function (e) {
                 const value = e.target.value;
